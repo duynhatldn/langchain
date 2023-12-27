@@ -4,3 +4,5 @@ langchain
 python-dotenv
 pypdf
 tiktoken
+transformers
+sentence-transformers

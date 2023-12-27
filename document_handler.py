@@ -23,7 +23,8 @@ class DocumentHandler:
 
         try:
             documents = self.read_docs()
-            self.index = Pinecone.from_documents(documents, self.embeddings, index_name=self.index_name)
+            chunked_documents = self.chunk_data(documents)
+            self.index = Pinecone.from_documents(chunked_documents, self.embeddings, index_name=self.index_name)
         except Exception as e:
             print(f"Error in initializing Pinecone index: {e}")
 
@@ -64,3 +65,14 @@ class DocumentHandler:
         except Exception as e:
             print(f"Error in retrieving answers: {e}")
             return "An error occurred while processing the query."
+
+    def document_exists(self, doc_id):
+        return doc_id in self.index
+
+    def update_documents(self, documents):
+        for doc in documents:
+            doc_id = doc['id']
+            if not self.document_exists(doc_id):
+                self.index.upsert(vectors=[(doc_id, self.embeddings.get_embedding(doc['text']))])
+
+
